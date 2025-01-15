@@ -15,7 +15,7 @@ const Navbar = ({
           <span className="ml-2 text-2xl font-bold text-indigo-600 neon-text">Taktik</span>
         </div>
 
-        {/* Navigation pour desktop */}
+        {/* Navigation */}
         <div className="hidden md:flex items-center space-x-4">
           <a href="#features" className="text-gray-600 hover:text-gray-900">Fonctionnalités</a>
           <a href="#pricing" className="text-gray-600 hover:text-gray-900">Tarifs</a>
