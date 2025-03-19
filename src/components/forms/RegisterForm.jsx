@@ -9,7 +9,9 @@ import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
 import { GoogleIcon, FacebookIcon } from '../CustomIcons';
+import authService from '../../services/authService';
 
 const RegisterForm = ({ onSwitchToLogin }) => {
  const [nameError, setNameError] = useState(false);
@@ -20,15 +22,37 @@ const RegisterForm = ({ onSwitchToLogin }) => {
  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = useState('');
+ const [isSubmitting, setIsSubmitting] = useState(false);
+ const [apiError, setApiError] = useState('');
+ const [successMessage, setSuccessMessage] = useState('');
 
- const handleSubmit = (event) => {
+ const handleSubmit = async (event) => {
    event.preventDefault();
-   const data = new FormData(event.currentTarget);
-   console.log({
-     name: data.get('name'),
-     email: data.get('email'),
-     password: data.get('password'),
-   });
+   
+   if (!validateInputs()) {
+     return;
+   }
+   
+   setIsSubmitting(true);
+   setApiError('');
+   setSuccessMessage('');
+   
+   const name = document.getElementById('name').value;
+   const email = document.getElementById('email').value;
+   const password = document.getElementById('password').value;
+   
+   try {
+     const response = await authService.register(name, email, password);
+     setSuccessMessage('Inscription réussie ! Redirection vers la connexion...');
+     
+     setTimeout(() => {
+       onSwitchToLogin();
+     }, 2000);
+   } catch (error) {
+     setApiError(error.message || 'Échec de l\'inscription. Veuillez réessayer.');
+   } finally {
+     setIsSubmitting(false);
+   }
  };
 
  const validateInputs = () => {
@@ -90,6 +114,9 @@ const RegisterForm = ({ onSwitchToLogin }) => {
        gap: 2,
      }}
    >
+     {apiError && <Alert severity="error">{apiError}</Alert>}
+     {successMessage && <Alert severity="success">{successMessage}</Alert>}
+     
      <FormControl>
        <FormLabel htmlFor="name">Nom</FormLabel>
        <TextField
@@ -163,9 +190,9 @@ const RegisterForm = ({ onSwitchToLogin }) => {
        type="submit"
        fullWidth
        variant="contained"
-       onClick={validateInputs}
+       disabled={isSubmitting}
      >
-       S'inscrire
+       {isSubmitting ? 'Inscription en cours...' : 'S\'inscrire'}
      </Button>
 
      <Divider>ou</Divider>
