@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -9,21 +10,41 @@ import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
 import { GoogleIcon, FacebookIcon } from '../CustomIcons';
+import authService from '../../services/authService';
 
 const LoginForm = ({ onSwitchToRegister }) => {
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState('');
+  
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    
+    if (!validateInputs()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setApiError('');
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+      await authService.login(email, password);
+      navigate('/dashboard');
+    } catch (error) {
+      setApiError(error.message || 'Échec de la connexion. Veuillez vérifier vos identifiants.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const validateInputs = () => {
@@ -65,6 +86,8 @@ const LoginForm = ({ onSwitchToRegister }) => {
         gap: 2,
       }}
     >
+      {apiError && <Alert severity="error">{apiError}</Alert>}
+      
       <FormControl>
         <FormLabel htmlFor="email">Email</FormLabel>
         <TextField
@@ -109,9 +132,9 @@ const LoginForm = ({ onSwitchToRegister }) => {
         type="submit"
         fullWidth
         variant="contained"
-        onClick={validateInputs}
+        disabled={isSubmitting}
       >
-        Se connecter
+        {isSubmitting ? 'Connexion en cours...' : 'Se connecter'}
       </Button>
 
       <Link
@@ -131,7 +154,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
           fullWidth
           variant="outlined"
           onClick={() => alert('Connexion avec Google')}
-          startIcon={<GoogleIcon />} // Vous devrez ajouter cette icône
+          startIcon={<GoogleIcon />}
         >
           Se connecter avec Google
         </Button>
@@ -140,7 +163,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
           fullWidth
           variant="outlined"
           onClick={() => alert('Connexion avec Facebook')}
-          startIcon={<FacebookIcon />} // Vous devrez ajouter cette icône
+          startIcon={<FacebookIcon />}
         >
           Se connecter avec Facebook
         </Button>

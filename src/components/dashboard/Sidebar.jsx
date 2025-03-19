@@ -1,5 +1,6 @@
 import React from 'react';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -35,13 +36,15 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
 
 const menuItems = [
   { title: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { title: 'Projets', icon: <AssignmentIcon />, path: '/projects' },
+  { title: 'Tableau', icon: <AssignmentIcon />, path: '/board' },
   { title: 'Équipe', icon: <GroupIcon />, path: '/team' },
   { title: 'Calendrier', icon: <CalendarIcon />, path: '/calendar' },
   { title: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
 ];
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   return (
     <StyledDrawer variant="permanent">
       <Box sx={{ p: 3 }}>
@@ -60,6 +63,7 @@ const Sidebar = () => {
         {menuItems.map((item) => (
           <ListItem key={item.title} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
+              onClick={() => navigate(item.path)}
               sx={{
                 borderRadius: '8px',
                 '&:hover': {
